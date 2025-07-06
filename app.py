@@ -1,45 +1,26 @@
-import os
-import uuid
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import boto3
-from dotenv import load_dotenv
-
-load_dotenv()
+import uuid
 
 app = Flask(__name__)
-app.secret_key = os.getenv('secret_key')
+app.secret_key = 'pzegzzxDEYSpBzZdvtgbmXCbMkVKv3T6K6Ti10ZI'
 
 # AWS Configuration
-aws_access_key = os.getenv('AWS_ACCESS_KEY_ID')
-aws_secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-aws_region = os.getenv('AWS_DEFAULT_REGION')
-sns_topic_arn = os.getenv('SNS_TOPIC_ARN')
-
-# AWS Clients
-dynamodb = boto3.resource(
-    'dynamodb',
-    region_name=aws_region,
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key
-)
-
-sns = boto3.client(
-    'sns',
-    region_name=aws_region,
-    aws_access_key_id=aws_access_key,
-    aws_secret_access_key=aws_secret_key
-)
+dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')  # Change if needed
+sns = boto3.client('sns', region_name='ap-south-1')
+sns_topic_arn = 'arn:aws:sns:ap-south-1:533267340399:Medtrack'  # Replace with actual ARN
 
 # DynamoDB Tables
 user_table = dynamodb.Table('Users')
-doctor_table = dynamodb.Table('Doctors')  # 'name' is partition key
-appointment_table = dynamodb.Table('Appointments')  # 'appointment_id' is partition key
+doctor_table = dynamodb.Table('Doctors')
+appointment_table = dynamodb.Table('Appointments')
 
 # Routes
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# ------------------ AUTH ------------------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -50,9 +31,9 @@ def register():
             flash("Registered successfully! Please log in.", "success")
             return redirect(url_for('login'))
         except Exception as e:
-            print(f"Error: {str(e)}")
-            flash("Registration failed.", "danger")
+            print(f"Error: {str(e)}", "danger")
     return render_template('register.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -71,18 +52,21 @@ def login():
             flash(f"Error: {str(e)}", "danger")
     return render_template('login.html')
 
+
 @app.route('/logout')
 def logout():
     session.clear()
     flash("Logged out successfully!", "info")
     return redirect(url_for('home'))
 
+# ------------------ DASHBOARD ------------------
 @app.route('/dashboard')
 def dashboard():
     if 'user' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
 
+# ------------------ DOCTORS ------------------
 @app.route('/doctors')
 def view_doctors():
     if 'user' not in session:
@@ -95,13 +79,14 @@ def view_doctors():
         flash(f"Error fetching doctors: {str(e)}", "danger")
         return redirect(url_for('dashboard'))
 
+# ------------------ APPOINTMENTS ------------------
 @app.route('/book', methods=['GET', 'POST'])
 def book_appointment():
     if 'user' not in session:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        doctor_name = request.form['doctor_id']
+        doctor_name = request.form['doctor_id']  # note: 'doctor_id' is still used in the form
         date = request.form['date']
         time = request.form['time']
         symptoms = request.form['symptoms']
@@ -109,19 +94,22 @@ def book_appointment():
         user_email = session['user']
 
         try:
+            # Save to DynamoDB
             appointment_table.put_item(Item={
                 'appointment_id': appointment_id,
                 'user_email': user_email,
-                'doctor_id': doctor_name,
+                'doctor_id': doctor_name,  # storing name as doctor_id
                 'date': date,
                 'time': time,
                 'symptoms': symptoms
             })
 
+            # Fetch doctor name from Doctors table using 'name' as key
             doctor_response = doctor_table.get_item(Key={'name': doctor_name})
             doctor = doctor_response.get('Item', {})
             doctor_display = doctor.get('name', 'Unknown')
 
+            # Send SNS notification
             message = f"Appointment confirmed with Dr. {doctor_display} on {date} at {time}.\nReason: {symptoms}"
             sns.publish(
                 TopicArn=sns_topic_arn,
@@ -136,6 +124,7 @@ def book_appointment():
             flash(f"Error booking appointment: {str(e)}", "danger")
             return redirect(url_for('dashboard'))
 
+    # GET: load all doctors
     try:
         response = doctor_table.scan()
         doctors = response.get('Items', [])
@@ -143,6 +132,7 @@ def book_appointment():
     except Exception as e:
         flash(f"Error loading doctors: {str(e)}", "danger")
         return redirect(url_for('dashboard'))
+
 
 @app.route('/appointments')
 def view_appointments():
@@ -156,6 +146,7 @@ def view_appointments():
         user_appointments = [appt for appt in all_appointments if appt.get('user_email') == user_email]
 
         for appt in user_appointments:
+            # now lookup by doctor name
             doc = doctor_table.get_item(Key={'name': appt['doctor_id']}).get('Item', {})
             appt['doctor_name'] = doc.get('name', 'Unknown')
             appt['speciality'] = doc.get('speciality', 'N/A')
@@ -163,9 +154,13 @@ def view_appointments():
         return render_template('appointments.html', appointments=user_appointments)
 
     except Exception as e:
-        print(f"Error loading appointments: {str(e)}")
-        flash("Could not load appointments.", "danger")
+        print(f"Error loading appointments: {str(e)}", "danger")
+        flash(f"Error loading appointments: {str(e)}", "danger")
         return redirect(url_for('dashboard'))
+
+
+    
+
 
 # ------------------ Run Server ------------------
 if __name__ == '__main__':

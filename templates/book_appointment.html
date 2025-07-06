@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment | HealthCare</title>
+ <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">Health<span>Care</span></div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="#">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <section class="appointment-container">
+    <form method="POST" class="appointment-form">
+      <h2>Book an Appointment</h2>
+      <p>Select a doctor and provide your symptoms to book a consultation.</p>
+
+      <h3>Select Doctor</h3>
+      <div class="doctor-grid">
+        {% for doctor in doctors %}
+        <label class="doctor-card">
+          <input type="radio" name="doctor_id" value="{{ doctor.doctor_id }}" required>
+          <div class="avatar">{{ doctor.name[0] | lower }}</div>
+          <strong>Dr. {{ doctor.name }}</strong>
+          <small>{{ doctor.speciality }}</small>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Appointment Date</label>
+          <input type="date" name="date" required>
+        </div>
+        <div>
+          <label>Appointment Time</label>
+          <input type="time" name="time" required>
+        </div>
+      </div>
+
+      <label>Symptoms / Reason for Visit</label>
+      <textarea name="symptoms" rows="4" placeholder="Please describe your symptoms..." required></textarea>
+
+      <button type="submit" class="btn full">Book Appointment</button>
+    </form>
+  </section>
+
+  <footer class="footer">
+    <p>© 2025 HealthCare App. All rights reserved.</p>
+  </footer>
+</body>
+</html>

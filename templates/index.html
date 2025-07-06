@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HealthCare</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">Health<span>Care</span></div>
+    <div class="nav-links">
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+    </div>
+  </nav>
+
+  <header class="hero-section">
+    <div class="hero-content">
+      <h1>Welcome to HealthCare App</h1>
+      <p>Connect with doctors, book appointments, and manage your health — anytime, anywhere.</p>
+      <div class="hero-buttons">
+        <a href="{{ url_for('login') }}" class="btn">Login</a>
+        <a href="{{ url_for('register') }}" class="btn btn-outline">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="features">
+    <div class="feature-card">
+      <div class="icon">🩺</div>
+      <h3>Find Doctors</h3>
+      <p>Connect with qualified specialists across various medical fields.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📅</div>
+      <h3>Easy Appointments</h3>
+      <p>Book appointments effortlessly — no calls, no waiting.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">📁</div>
+      <h3>Digital Records</h3>
+      <p>Access diagnoses, prescriptions, and history securely.</p>
+    </div>
+  </section>
+</body>
+</html>

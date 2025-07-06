@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Doctors | HealthCare</title>
+ 
+ <link rel="stylesheet" href="/static/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">Health<span>Care</span></div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <section class="doctor-list">
+    <h2>👩‍⚕️ Available Doctors</h2>
+    <div class="cards-container">
+      {% for doctor in doctors %}
+      <div class="card">
+        <div class="avatar">{{ doctor.name[0] }}</div>
+        <h3>Dr. {{ doctor.name }}</h3>
+        <p class="speciality">{{ doctor.speciality }}</p>
+        <a href="{{ url_for('book_appointment', doctor_id=doctor.doctor_id) }}" class="btn">Book Appointment</a>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Appointments | HealthCare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">Health<span>Care</span></div>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  </nav>
+
+  <section class="appointments-section">
+  <h2>📅 Your Appointments</h2>
+  {% if appointments %}
+    <div class="appointment-list">
+      {% for appt in appointments %}
+      <div class="appointment-card">
+        <h3>Dr. {{ appt.doctor_name }}</h3>
+        <p><strong>Speciality:</strong> {{ appt.speciality }}</p>
+        <p><strong>Date:</strong> {{ appt.date }}</p>
+        <p><strong>Time:</strong> {{ appt.time }}</p>
+        <p><strong>Reason:</strong> {{ appt.symptoms }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No appointments found.</p>
+  {% endif %}
+
+  <!-- 🔙 Back to Dashboard Button -->
+  <div class="back-button">
+    <a href="{{ url_for('dashboard') }}" class="btn-back">← Back to Dashboard</a>
+  </div>
+</section>
+
+</body>
+</html>

@@ -31,7 +31,7 @@ A modern, responsive Healthcare Appointment Booking web app built using **Flask*
 ---
 
 ## 🎥 Demo Video
-[![Watch the Demo](assets/demo-thumbnail.png)](https://drive.google.com/file/d/1m0nCIB16Wc3wr9F4SOUdD6Tb099AiYop/view?usp=sharing)
+[![Watch the Demo](demo-thumbnail.png)](https://drive.google.com/file/d/1m0nCIB16Wc3wr9F4SOUdD6Tb099AiYop/view?usp=sharing)
 
 ## 📁 Folder Structure
 
